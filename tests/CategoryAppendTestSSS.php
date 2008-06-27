@@ -1,6 +1,6 @@
 <?php
+
 require_once dirname(__FILE__) . '/config.test.php';
-require_once 'PHPUnit/Framework.php';
 
 require_once '../src/Ilib/Category.php';
 require_once '../src/Ilib/Category/Appender.php';
@@ -8,9 +8,14 @@ require_once '../src/Ilib/Category/Type.php';
 
 require_once 'MDB2.php';
 
-class CategoryAppendTest extends PHPUnit_Framework_TestCase
+$test = new CategoryAppendTest();
+$test->setUp();
+$test->test();
+$test->tearDown();
+
+
+class CategoryAppendTest
 {
-	private $table = 'ilib_category';
 	private $db;
 	
     /////////////////////////////////////////////////////////////
@@ -22,7 +27,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
             die($this->db->getUserInfo());
         }
         
-        $result = $this->db->exec('DROP TABLE ' . $this->table);
+        $result = $this->db->exec('DROP TABLE `ilib_category`');
         /*
          TODO: DROP THE TABLE IF IT EXISTS
 
@@ -34,7 +39,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
         */
 
         $result = $this->db->exec(
-			'CREATE TABLE IF NOT EXISTS `' . $this->table . '` (
+			'CREATE TABLE IF NOT EXISTS `ilib_category` (
 			  `id` int(11) NOT NULL auto_increment,
 			  `belong_to` int(11) NOT NULL,
 			  `belong_to_id` int(11) NOT NULL,
@@ -44,10 +49,33 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
 			  PRIMARY KEY  (`id`)
 			);');
 
+        
+        
+        
         if (PEAR::isError($result)) {
             die($result->getUserInfo());
         }
-		$webshop_id = 2;
+        $result = $this->db->exec('DROP TABLE `ilib_category_append`');
+        
+        $result = $this->db->exec(
+			'CREATE TABLE IF NOT EXISTS `ilib_category_append` (
+			  `id` int(11) NOT NULL auto_increment,
+			  `object_id` int(11) NOT NULL,
+			  `category_id` int(11) NOT NULL,
+			  PRIMARY KEY  (`id`)
+			);');
+
+        
+        
+        
+        if (PEAR::isError($result)) {
+            die($result->getUserInfo());
+        }
+        
+        
+        
+
+
 	}
     function tearDown()
     {
@@ -57,26 +85,35 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
 
     function test()
     {
+    	$webshop_id = 4;
 		$type = new Ilib_Category_Type('webshop', $webshop_id);
 		
 		$category = new Ilib_Category($this->db, $type);  
 		$category->save('Min kategori', 'min-kategori', 0);
-				
+		
 		$category_hest = new Ilib_Category($this->db, $type);
-		$category_hest->save('Hest', 'hest', $category->id);
+		$category_hest->save('Hest', 'hest', $category->getId());
+
+		$category_ko = new Ilib_Category($this->db, $type);
+		$category_ko->save('Ko', 'ko', $category->getId());
 		
-		$category->getSubCategories();
+		print_r($category->getSubCategories());
 		
 		
 		
 		
+		$object_id = 5;
+		$appender = Ilib_Category_Appender::getInstance($this->db);  
+		$appender->add($category, $object_id);
+		
+		print_r($category->getSubObjects());
+
+		$appender->delete($category, $object_id);
+		
+		print_r($category->getSubObjects());
 		
 		
-		$product_id = 5;
-		$appender = new Ilib_Category_Appender($product_id);  
-		$appender->add($category);
 		
-		$this->assertEquals('test', 'test');
     }
 
 
