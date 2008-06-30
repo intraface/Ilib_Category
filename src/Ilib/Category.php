@@ -1,50 +1,112 @@
 <?php
 /**
- * Category
+ * Handles recursive categories.
+ * 
+ * php 5
  *
+ * @category Ilib
+ * @package  Ilib_Category
  * @author Kasper Broegaard Simonsen <kasper@broegaard.com>
  * @author Mads Thorsted Nielsen <mads@masowich.com>
  */
 
-require_once 'Category/Appender.php';
-require_once 'Category/Type.php';
-
-
 /**
  * Category 
+ * 
+ * @category Ilib
+ * @package  Ilib_Category
+ * @author Kasper Broegaard Simonsen <kasper@broegaard.com>
+ * @author Mads Thorsted Nielsen <mads@masowich.com>
  */
-
-class Ilib_Category {
-	private $db = null;
-	
+class Ilib_Category 
+{
+	/**
+     * @var object MDB2
+	 */
+    protected $db = null;
+    
+    /**
+     * @var object Ilib_Category_Type instance
+     */
 	private $type = null;
+    
+    /**
+     * @var string name of catogory
+     */
 	private $name = null;
+    
+    /**
+     * @var string identifier of category
+     */
 	private $identifier = null;
+    
+    /**
+     * @var integer parent id if child of other category
+     */
 	private $parent_id = null;
 	
+    /**
+     * @var id id of category
+     */
 	private $id = null;
 	
+    
+    /**
+     * @var string extra conditions for select sql queries
+     */
+    private $extra_condition_select;
+    
+    /**
+     * @var string extra conditions for update and insert sql queries
+     */
+    private $extra_condition_update;
+    
+    /**
+     * @var array options
+     */
+    protected $options;
+    
     /**
      * Constructor
      *
      * @param object $db database object
      * @param object $type type of category
+     * @param array options. Possibe options:
+     *              string 'extra_condition' extra conditions to use in sql eg. "intranet_id = 1" 
      *
      * @return void
-     */
-		
-	public function __construct($db, $type) {
+     */		
+	public function __construct($db, $type, $id = NULL, $options = array()) 
+    {
 		$this->db = $db;
 		$this->type = $type;
+        $this->id = $id;
+        if(!is_array($options)) throw new Exception('Options must be an array!');
+        $this->options = $options;
+        
+        $this->extra_condition_select = '';
+        $this->extra_condition_update = '';
+        if(isset($this->options['extra_condition']) && is_array($this->options['extra_condition'])) {
+            foreach($this->options['extra_condition'] AS $condition) {
+                $this->extra_condition_select .= ' AND '.$condition;
+                $this->extra_condition_update .= ', '.$condition;
+            }
+        }
+        
+        
+        if($this->id !== NULL) {
+            $this->load();
+        }
+        
 	}
 	
     /**
      * get category type
      *
      * @return Category_Type
-     */
-	
-	public function getType() {
+     */	
+	public function getType() 
+    {
 		return $this->type;
 	}
 
@@ -55,7 +117,8 @@ class Ilib_Category {
      *
      * @return void
      */
-	public function setName($name) {
+	public function setName($name) 
+    {
 		$this->name = $name;
 	}
 	
@@ -63,9 +126,9 @@ class Ilib_Category {
      * get category name
      * 
      * @return String
-     */
-	
-	public function getName() {
+     */	
+	public function getName() 
+    {
 		return $this->name;
 	}
 	
@@ -76,9 +139,9 @@ class Ilib_Category {
      * @param String $identifier identifier of category
      *
      * @return void
-     */
-	
-	public function setIdentifier($identifier) {
+     */	
+	public function setIdentifier($identifier) 
+    {
 		$this->identifier = $identifier;
 	}
 	
@@ -87,8 +150,8 @@ class Ilib_Category {
      * 
      * @return String
      */
-	
-	public function getIdentifier() {
+	public function getIdentifier() 
+    {
 		return $this->identifier;
 	}
 	
@@ -99,7 +162,8 @@ class Ilib_Category {
      *
      * @return void
      */
-	public function setParentId($parent_id) {
+	public function setParentId($parent_id) 
+    {
 		$this->parent_id = $parent_id;
 	}
     
@@ -108,7 +172,8 @@ class Ilib_Category {
      * 
      * @return Integer
      */
-	public function getParentId() {
+	public function getParentId() 
+    {
 		return $this->parent_id;
 	}
 	
@@ -117,30 +182,29 @@ class Ilib_Category {
      * 
      * @return Integer
      */
-	public function getId() {
+	public function getId() 
+    {
 		return $this->id;
 	}
 	
 	/**
      * load from db
      * 
-     * @param Integer $id id of category
-     * 
      * @return void
      */
-	public function load($id) {
+	public function load() {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
-        		"WHERE id = " . $id . " " . 
+        		"WHERE id = " . intval($this->id) . " " . 
                 "AND belong_to = ".$this->db->quote($this->type->getBelongTo(), 'integer')." " .
                 "AND belong_to_id = ".$this->db->quote($this->type->getBelongToId(), 'integer')." " .
+                $this->extra_condition_select .
         		";");
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
         	exit;
         }
         
-        $sub = array();
         if ($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
 			$this->name = $row['name'];
 			$this->identifier = $row['identifier'];
@@ -157,7 +221,8 @@ class Ilib_Category {
      * 
      * @return void
      */
-	public function save() { 
+	public function save() 
+    { 
 		
 		if ($this->type === null ||
 			$this->name === null ||
@@ -173,7 +238,8 @@ class Ilib_Category {
 				"belong_to_id = ".$this->db->quote($this->type->getBelongToId(), 'integer').", " .
 				"parent_id = ".$this->db->quote($this->parent_id, 'integer').", " .
 				"name = ".$this->db->quote($this->name, 'text').", " .
-				"identifier = ".$this->db->quote($this->identifier, 'text');
+				"identifier = ".$this->db->quote($this->identifier, 'text').
+                $this->extra_condition_update;
 		 
 		if ($this->id === null) {
 	        $result = $this->db->exec("INSERT INTO" . $sql . ";");
@@ -189,8 +255,8 @@ class Ilib_Category {
 	        	exit;
 	        }
 		}
+        return true;
 	}
-	
 	
 	/**
      * get sub categories 
@@ -211,7 +277,16 @@ class Ilib_Category {
 		}
 		return $sub;
 	}
-	
-	
+    
+    /**
+     * Returns appender object
+     * 
+     * @return object Ilib_Category_Appender instance
+     */
+    public function getAppender($object_id) 
+    {
+        require_once 'Ilib/Category/Appender.php';
+        return new Ilib_Category_Appender($this->db, $object_id, $this->options);
+    }
 }
 ?>

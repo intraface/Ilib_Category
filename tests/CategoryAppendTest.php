@@ -10,10 +10,7 @@ require_once 'MDB2.php';
 
 class CategoryAppendTest extends PHPUnit_Framework_TestCase
 {
-	private $db;
-	
-    /////////////////////////////////////////////////////////////
-    
+	private $db; 
 
     function setUp()
     {
@@ -22,159 +19,101 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
             die($this->db->getUserInfo());
         }
         
-        $result = $this->db->exec('DROP TABLE `ilib_category`');
-        /*
-         TODO: DROP THE TABLE IF IT EXISTS
-
-        $result = $this->db->exec('DROP TABLE ' . $this->table);
-
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
         if (PEAR::isError($result)) {
             die($result->getUserInfo());
         }
-        */
-
-        $result = $this->db->exec(
-			'CREATE TABLE IF NOT EXISTS `ilib_category` (
-			  `id` int(11) NOT NULL auto_increment,
-			  `belong_to` int(11) NOT NULL,
-			  `belong_to_id` int(11) NOT NULL,
-			  `parent_id` int(11) NOT NULL,
-			  `name` varchar(255) NOT NULL,
-			  `identifier` varchar(255) NOT NULL,
-			  PRIMARY KEY  (`id`)
-			);');
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
         if (PEAR::isError($result)) {
             die($result->getUserInfo());
         }
         
-        $result = $this->db->exec(
-			"INSERT INTO `ilib_category` (`id`, `belong_to`, `belong_to_id`, `parent_id`, `name`, `identifier`) VALUES
-			(1, 1, 4, 0, 'Min kategori', 'min-kategori'),
-			(2, 1, 4, 1, 'Hest', 'hest');");
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
         
-        $result = $this->db->exec('DROP TABLE `ilib_category_append`');
-        
-        $result = $this->db->exec(
-			'CREATE TABLE IF NOT EXISTS `ilib_category_append` (
-			  `id` int(11) NOT NULL auto_increment,
-			  `object_id` int(11) NOT NULL,
-			  `category_id` int(11) NOT NULL,
-			  PRIMARY KEY  (`id`)
-			);');
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-	}
+    }
+    
     function tearDown()
     {
-		$result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
-		if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-		$result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
-		if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
+		
         
     }
-
-    function getWebshopType() {
-    	return new Ilib_Category_Type('webshop', 4);
-    }
-    function testCreateType() {
-		$type = $this->getWebshopType();
-		$this->assertEquals(1, $type->getBelongTo());
-    	
+    
+    function getDefaultType() {
+        return new Ilib_Category_Type('default', 4);
     }
     
-    function testCreateCategory()
+    function createCategory($key = 1)
     {
-    	$type = $this->getWebshopType();
-		
-		$category_hest = new Ilib_Category($this->db, $type);
-		$category_hest->setIdentifier('hest');
-		$category_hest->setName('Hest');
-		$category_hest->setParentId(2);
-		
-		$category_hest->save();	// test INSERT query
-		$category_hest->save();	// test UPDATE query
-		
-//		$category_hest->delete();	// to be implemented
+        $category = new Ilib_Category($this->db, $this->getDefaultType());
+        $category->setIdentifier('min-kategori'.$key);
+        $category->setName('Min kategori'.$key);
+        $category->setParentId(0);
+        $category->save();
+        $category->load();
+        return $category;
+    }
+
+    /////////////////////////////////////////////////77
+    
+    function testConstruct()
+    {
+        $appender = new Ilib_Category_Appender($this->db, 1);
+        $this->assertTrue(is_object($appender));
     }
     
-    function testLoadCategory() {
-    	
-		$category = new Ilib_Category($this->db, $this->getWebshopType());
-		$category->load(1);
-		
-		$this->assertEquals(1, $category->getId());
-		$this->assertEquals('min-kategori', $category->getIdentifier());
-		$this->assertEquals('Min kategori', $category->getName());
-		$this->assertEquals(0, $category->getParentId());
+    function testAdd()
+    {
+        
+        $appender = new Ilib_Category_Appender($this->db, 1);
+        $this->assertTrue($appender->add($this->createCategory()));
+        
     }
     
-    function testLoadSubCategory() {
-		
-		$category = new Ilib_Category($this->db, $this->getWebshopType());
-		$category->load(1);
-    	
-		$subCategories = $category->getSubCategories();
-		
-    	$this->assertEquals(count($subCategories), 1);
-		
-    	foreach($subCategories as $key=>$value) {
-			$category_hest = new Ilib_Category($this->db, $this->getWebshopType());
-			$category_hest->load($key);
-			
-			$this->assertEquals(2, $category_hest->getId());
-			$this->assertEquals('hest', $category_hest->getIdentifier());
-			$this->assertEquals('Hest', $category_hest->getName());
-			$this->assertEquals(1, $category_hest->getParentId());
-    	}
+    function testDelete()
+    {
+        
+        $appender = new Ilib_Category_Appender($this->db, 1);
+        $category = $this->createCategory();
+        $appender->add($category);
+        $this->assertTrue($appender->delete($category));
+        
     }
     
-    function testAppender() {
-		$category = new Ilib_Category($this->db, $this->getWebshopType());
-		$category->load(1);
-    	
-    	
-		$category_hest = new Ilib_Category($this->db, $this->getWebshopType());
-		$category_hest->load(2);
-    	
-		$object_id = 5;
-		$appender = Ilib_Category_Appender::getInstance($this->db);
-		  
-		$appender->add($category, $object_id);
-		$appender->add($category_hest, $object_id);
+    
+    function testGetCategories() {
 		
-		
-		$objects = $appender->getObjects($category);
-		$this->assertEquals(count($objects), 1);
-		
-		foreach($objects as $key=>$value) {
-			$this->assertEquals($value, 5);
-		}
-		
-		$appender->delete($category, $object_id);
-		
-		$objects = $appender->getObjects($category);
-		$this->assertEquals(count($objects), 0);
-		
-		$objects = $appender->getObjects($category_hest);
-		$this->assertEquals(count($objects), 1);
-		
-		foreach($objects as $key=>$value) {
-			$this->assertEquals($value, 5);
-		}
-		
-		$appender->delete($category_hest, $object_id);
-		
-		$objects = $appender->getObjects($category_hest);
-		$this->assertEquals(count($objects), 0);
-		
+        $appender = new Ilib_Category_Appender($this->db, 1);
+        $appender->add($this->createCategory(1));
+        $appender->add($this->createCategory(2));
+        $appender->add($this->createCategory(3));
+        
+        $expected = array(
+            0 => array(
+                'id' => 1,
+                'belong_to' => 1,
+                'belong_to_id' => 4,
+                'parent_id' => 0,
+                'name' => 'Min kategori1',
+                'identifier' => 'min-kategori1'
+            ),
+            1 => array(
+                'id' => 2,
+                'belong_to' => 1,
+                'belong_to_id' => 4,
+                'parent_id' => 0,
+                'name' => 'Min kategori2',
+                'identifier' => 'min-kategori2'
+            ),
+            2 => array(
+                'id' => 3,
+                'belong_to' => 1,
+                'belong_to_id' => 4,
+                'parent_id' => 0,
+                'name' => 'Min kategori3',
+                'identifier' => 'min-kategori3'
+            )
+        );
+        
+        $this->assertEquals($expected, $appender->getCategories());
     }
 
 
