@@ -1,5 +1,12 @@
 <?php
 class Ilib_Category_Appender {
+	/**
+     * get instance
+     *
+     * @param Object $db database
+     *
+     * @return instance
+     */
 	
 	public function getInstance($db) {
 		static $instance = null;
@@ -10,9 +17,26 @@ class Ilib_Category_Appender {
 	}
 	
 	private $db;
+	
+	/**
+     * Constructor (private because of singleton)
+     *
+     * @param Object $db database
+     *
+     * @return void
+     */
 	private function __construct($db) {
 		$this->db = $db;
 	}
+	
+	/**
+     * add
+     *
+     * @param Object $category category
+     * @param Integer $object_id id of object
+     * 
+     * @return void
+     */
 	
 	public function add($category, $object_id) {
         $result = $this->db->exec(
@@ -26,6 +50,16 @@ class Ilib_Category_Appender {
         	exit;
         }
 	}
+	
+	/**
+     * delete
+     *
+     * @param Object $category category
+     * @param Integer $object_id id of object
+     * 
+     * @return void
+     */
+	
 	public function delete($category, $object_id) {
         $result = $this->db->exec(
         		"DELETE FROM `ilib_category_append` " .
@@ -37,7 +71,16 @@ class Ilib_Category_Appender {
         }
 	}
 	
-	public function getSubObjects($category){
+	
+	/**
+     * get objects
+     *
+     * @param Object $category category
+     * 
+     * @return void
+     */
+	
+	public function getObjects($category){
         $result = $this->db->query(
         		"SELECT * FROM ilib_category_append " .
         		"WHERE category_id = " . $category->getId() . ";");

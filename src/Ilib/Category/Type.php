@@ -3,6 +3,15 @@ class Ilib_Category_Type {
 	var $belong_to;
 	var $id;
 	
+	/**
+     * Constructor
+     *
+     * @param String $type type of category
+     * @param Integer $id type id
+     *
+     * @return void
+     */
+		
 	public function __construct($type, $id) {
 		$this->id = $id;
 		switch($type) {
@@ -16,9 +25,21 @@ class Ilib_Category_Type {
 		}
 	}
 	
+	/**
+     * get belong to
+     *
+     * @return Integer
+     */
+	
 	public function getBelongTo() {
 		return $this->belong_to;
 	}
+
+	/**
+     * get belong to id
+     *
+     * @return Integer
+     */
 	public function getBelongToId() {
 		return $this->id;
 	}
