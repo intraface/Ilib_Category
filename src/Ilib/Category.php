@@ -1,7 +1,18 @@
 <?php
+/**
+ * Category
+ *
+ * @author Kasper Broegaard Simonsen <kasper@broegaard.com>
+ * @author Mads Thorsted Nielsen <mads@masowich.com>
+ */
+
 require_once 'Category/Appender.php';
 require_once 'Category/Type.php';
 
+
+/**
+ * Category 
+ */
 
 class Ilib_Category {
 	private $db = null;
@@ -13,39 +24,110 @@ class Ilib_Category {
 	
 	private $id = null;
 	
+    /**
+     * Constructor
+     *
+     * @param object $db database object
+     * @param object $type type of category
+     *
+     * @return void
+     */
+		
 	public function __construct($db, $type) {
 		$this->db = $db;
 		$this->type = $type;
 	}
+	
+    /**
+     * get category type
+     *
+     * @return Category_Type
+     */
+	
 	public function getType() {
 		return $this->type;
 	}
 
+    /**
+     * set category name
+     * 
+     * @param String $name name of category
+     *
+     * @return void
+     */
 	public function setName($name) {
 		$this->name = $name;
 	}
+	
+	/**
+     * get category name
+     * 
+     * @return String
+     */
+	
 	public function getName() {
 		return $this->name;
 	}
 	
+
+    /**
+     * set category identitier
+     * 
+     * @param String $identifier identifier of category
+     *
+     * @return void
+     */
+	
 	public function setIdentifier($identifier) {
 		$this->identifier = $identifier;
 	}
+	
+	/**
+     * get category identifier
+     * 
+     * @return String
+     */
+	
 	public function getIdentifier() {
 		return $this->identifier;
 	}
 	
+    /**
+     * set category parent id
+     * 
+     * @param Integer $parent_id id of parent category
+     *
+     * @return void
+     */
 	public function setParentId($parent_id) {
 		$this->parent_id = $parent_id;
 	}
+    
+	/**
+     * get parent id
+     * 
+     * @return Integer
+     */
 	public function getParentId() {
 		return $this->parent_id;
 	}
 	
+	/**
+     * get id
+     * 
+     * @return Integer
+     */
 	public function getId() {
 		return $this->id;
 	}
 	
+	/**
+     * load from db
+     * 
+     * @param Integer $id id of category
+     * 
+     * @return void
+     */
 	public function load($id) {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
@@ -70,6 +152,11 @@ class Ilib_Category {
         }
 	}
 	
+	/**
+     * save to db
+     * 
+     * @return void
+     */
 	public function save() { 
 		
 		if ($this->type === null ||
@@ -104,6 +191,12 @@ class Ilib_Category {
 		}
 	}
 	
+	
+	/**
+     * get sub categories 
+     * 
+     * @return array (id as key, identifier as value)
+     */
 	public function getSubCategories() {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
