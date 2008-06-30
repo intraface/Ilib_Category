@@ -20,12 +20,37 @@ class Ilib_Category_Appender {
                 "SET " .
                 "object_id = ".$this->db->quote($object_id, 'integer').", " .
                 "category_id = ".$this->db->quote($category->getId(), 'integer'). ";");
+        
+        if (PEAR::isError($result)) {
+        	throw new Exception("Error in query: " . $result->getUserInfo());
+        	exit;
+        }
 	}
 	public function delete($category, $object_id) {
         $result = $this->db->exec(
         		"DELETE FROM `ilib_category_append` " .
                 "WHERE object_id = ".$this->db->quote($object_id, 'integer')." " .
                 "AND category_id = ".$this->db->quote($category->getId(), 'integer'). ";");
+        if (PEAR::isError($result)) {
+        	throw new Exception("Error in query: " . $result->getUserInfo());
+        	exit;
+        }
 	}
+	
+	public function getSubObjects($category){
+        $result = $this->db->query(
+        		"SELECT * FROM ilib_category_append " .
+        		"WHERE category_id = " . $category->getId() . ";");
+        if (PEAR::isError($result)) {
+        	throw new Exception("Error in query: " . $result->getUserInfo());
+        	exit;
+        }
+        $sub = array();
+        while($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+        	$sub[$row['id']] = $row['object_id'];
+		}
+		return $sub;
+	}
+	
 }
 ?>

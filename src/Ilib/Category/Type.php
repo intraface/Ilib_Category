@@ -11,8 +11,8 @@ class Ilib_Category_Type {
 				break;
 				
 			default:
-				// SOME ERROR HANDLING HERE, PLEASE!
-				break;
+				throw new Exception('invalid type');
+            	exit;
 		}
 	}
 	
