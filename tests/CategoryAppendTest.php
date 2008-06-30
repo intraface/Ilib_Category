@@ -151,7 +151,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
 		$appender->add($category_hest, $object_id);
 		
 		
-		$objects = $appender->getSubObjects($category);
+		$objects = $appender->getObjects($category);
 		$this->assertEquals(count($objects), 1);
 		
 		foreach($objects as $key=>$value) {
@@ -160,10 +160,10 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
 		
 		$appender->delete($category, $object_id);
 		
-		$objects = $appender->getSubObjects($category);
+		$objects = $appender->getObjects($category);
 		$this->assertEquals(count($objects), 0);
 		
-		$objects = $appender->getSubObjects($category_hest);
+		$objects = $appender->getObjects($category_hest);
 		$this->assertEquals(count($objects), 1);
 		
 		foreach($objects as $key=>$value) {
@@ -172,7 +172,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
 		
 		$appender->delete($category_hest, $object_id);
 		
-		$objects = $appender->getSubObjects($category_hest);
+		$objects = $appender->getObjects($category_hest);
 		$this->assertEquals(count($objects), 0);
 		
     }
