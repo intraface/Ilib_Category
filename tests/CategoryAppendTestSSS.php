@@ -88,14 +88,26 @@ class CategoryAppendTest
     	$webshop_id = 4;
 		$type = new Ilib_Category_Type('webshop', $webshop_id);
 		
-		$category = new Ilib_Category($this->db, $type);  
-		$category->save('Min kategori', 'min-kategori', 0);
+		$category = new Ilib_Category($this->db);
 		
-		$category_hest = new Ilib_Category($this->db, $type);
-		$category_hest->save('Hest', 'hest', $category->getId());
-
-		$category_ko = new Ilib_Category($this->db, $type);
-		$category_ko->save('Ko', 'ko', $category->getId());
+		$category->setType($type);
+		$category->setIdentifier('min-kategori');
+		$category->setName('Min kategori');
+		$category->setParentId(0);
+		$category->save();
+		
+		$category_hest = new Ilib_Category($this->db);
+		
+		$category_hest->setType($type);
+		$category_hest->setIdentifier('hest');
+		$category_hest->setName('Hest');
+		$category_hest->setParentId($category->getId());
+		$category_hest->save();
+		$category_hest->save();
+		
+		
+		$category_ko = new Ilib_Category($this->db);
+		$category_ko->load($category_hest->getId(), $type);
 		
 		print_r($category->getSubCategories());
 		
