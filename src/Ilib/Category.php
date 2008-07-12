@@ -50,7 +50,6 @@ class Ilib_Category
      */
 	private $id = null;
 	
-    
     /**
      * @var string extra conditions for select sql queries
      */
@@ -76,28 +75,28 @@ class Ilib_Category
      *
      * @return void
      */		
-	public function __construct($db, $type, $id = NULL, $options = array()) 
+	public function __construct($db, $type, $id = 0, $options = array()) 
     {
 		$this->db = $db;
 		$this->type = $type;
         $this->id = $id;
-        if(!is_array($options)) throw new Exception('Options must be an array!');
+        if (!is_array($options)) {
+            throw new Exception('Options must be an array!');   
+        }
         $this->options = $options;
         
         $this->extra_condition_select = '';
         $this->extra_condition_update = '';
-        if(isset($this->options['extra_condition']) && is_array($this->options['extra_condition'])) {
-            foreach($this->options['extra_condition'] AS $condition) {
+        if (isset($this->options['extra_condition']) && is_array($this->options['extra_condition'])) {
+            foreach ($this->options['extra_condition'] AS $condition) {
                 $this->extra_condition_select .= ' AND '.$condition;
                 $this->extra_condition_update .= ', '.$condition;
             }
         }
         
-        
-        if($this->id !== NULL) {
+        if ($this->id > NULL) {
             $this->load();
         }
-        
 	}
 	
     /**
@@ -192,7 +191,7 @@ class Ilib_Category
      * 
      * @return void
      */
-	public function load() {
+	private function load() {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
         		"WHERE id = " . intval($this->id) . " " . 
@@ -202,7 +201,6 @@ class Ilib_Category
         		";");
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
-        	exit;
         }
         
         if ($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -212,7 +210,6 @@ class Ilib_Category
 			$this->id = $row['id'];
         } else {
         	throw new Exception('wrong id or type');
-        	exit;
         }
 	}
 	
@@ -223,13 +220,11 @@ class Ilib_Category
      */
 	public function save() 
     { 
-		
 		if ($this->type === null ||
 			$this->name === null ||
 			$this->identifier === null ||
 			$this->parent_id === null) {
 				throw new Exception('one of the parameters is not set');
-				exit;
 		}
 		
 		$sql =	" ilib_category " .
@@ -245,14 +240,12 @@ class Ilib_Category
 	        $result = $this->db->exec("INSERT INTO" . $sql . ";");
 	        if (PEAR::isError($result)) {
 	        	throw new Exception("Error in query: " . $result->getUserInfo());
-	        	exit;
 	        }
 		    $this->id = $this->db->lastInsertID();
 		} else {
 	        $result = $this->db->exec("UPDATE " . $sql . " WHERE id = " . $this->db->quote($this->id, 'text') . ";");
 	        if (PEAR::isError($result)) {
 	        	throw new Exception("Error in query: " . $result->getUserInfo());
-	        	exit;
 	        }
 		}
         return true;
@@ -271,7 +264,6 @@ class Ilib_Category
                 ";");
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
-        	exit;
         }
         $sub = array();
         while($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -295,7 +287,6 @@ class Ilib_Category
         
         if (PEAR::isError($result)) {
             throw new Exception("Error in query: " . $result->getUserInfo());
-            exit;
         }
         
         return $this->getCategoriesByParentId(0, $result->fetchAll(MDB2_FETCHMODE_ASSOC));
@@ -306,13 +297,14 @@ class Ilib_Category
      * 
      * @param integer $parent_id id on parent category to find subcategories from
      * @param array $categories One dimensional array with all categories
+     * 
      * @return array Recursiv array with categories and subcategories
      */
     private function getCategoriesByParentId($parent_id, $categories)
     {
         $return = array();
-        foreach($categories AS $category) {
-            if($category['parent_id'] == $parent_id) {
+        foreach ($categories AS $category) {
+            if ($category['parent_id'] == $parent_id) {
                 $return[$category['id']] = array_merge(
                     $category, 
                     array('categories' => $this->getCategoriesByParentId($category['id'], $categories))
