@@ -111,7 +111,7 @@ class Ilib_Category_Appender
         		"DELETE FROM `ilib_category_append` " .
                 "WHERE object_id = ".$this->db->quote($this->object_id, 'integer')." " .
                 "AND category_id = ".$this->db->quote($category->getId(), 'integer').
-                $this->extra_condition_select);
+                $this->extra_condition_delete);
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
         	exit;
