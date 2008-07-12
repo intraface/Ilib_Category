@@ -191,7 +191,8 @@ class Ilib_Category
      * 
      * @return void
      */
-	private function load() {
+	private function load() 
+    {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
         		"WHERE id = " . intval($this->id) . " " . 
@@ -256,7 +257,8 @@ class Ilib_Category
      * 
      * @return array (id as key, identifier as value)
      */
-	public function getSubCategories() {
+	public function getSubCategories() 
+    {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
         		"WHERE parent_id = " . $this->id . 
@@ -326,4 +328,3 @@ class Ilib_Category
         return new Ilib_Category_Appender($this->db, $object_id, $this->options);
     }
 }
-?>
