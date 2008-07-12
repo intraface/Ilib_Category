@@ -94,7 +94,7 @@ class Ilib_Category
             }
         }
         
-        if ($this->id > NULL) {
+        if ($this->id > 0) {
             $this->load();
         }
 	}
@@ -236,7 +236,7 @@ class Ilib_Category
 				"identifier = ".$this->db->quote($this->identifier, 'text').
                 $this->extra_condition_update;
 		 
-		if ($this->id === null) {
+		if ($this->id == 0) {
 	        $result = $this->db->exec("INSERT INTO" . $sql . ";");
 	        if (PEAR::isError($result)) {
 	        	throw new Exception("Error in query: " . $result->getUserInfo());
