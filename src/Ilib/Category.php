@@ -266,7 +266,9 @@ class Ilib_Category
 	public function getSubCategories() {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
-        		"WHERE parent_id = " . $this->id . ";");
+        		"WHERE parent_id = " . $this->id . 
+                $this->extra_condition_select .    
+                ";");
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
         	exit;
@@ -277,6 +279,49 @@ class Ilib_Category
 		}
 		return $sub;
 	}
+    
+    
+    /**
+     * Returns an recursive array with all categories
+     * 
+     * @return array With categories
+     */
+    public function getAllCategories()
+    {
+        // We get all categories with one sql call then we organize the categories later. 
+        $result = $this->db->query( "SELECT * FROM ilib_category " .
+                "WHERE 1 = 1 " . 
+                $this->extra_condition_select);
+        
+        if (PEAR::isError($result)) {
+            throw new Exception("Error in query: " . $result->getUserInfo());
+            exit;
+        }
+        
+        return $this->getCategoriesByParentId(0, $result->fetchAll(MDB2_FETCHMODE_ASSOC));
+    }
+    
+    /**
+     * Returns all categories with subcategories to a given parent id
+     * 
+     * @param integer $parent_id id on parent category to find subcategories from
+     * @param array $categories One dimensional array with all categories
+     * @return array Recursiv array with categories and subcategories
+     */
+    private function getCategoriesByParentId($parent_id, $categories)
+    {
+        $return = array();
+        foreach($categories AS $category) {
+            if($category['parent_id'] == $parent_id) {
+                $return[$category['id']] = array_merge(
+                    $category, 
+                    array('categories' => $this->getCategoriesByParentId($category['id'], $categories))
+                );
+                
+            }
+        }
+        return $return;
+    }
     
     /**
      * Returns appender object
