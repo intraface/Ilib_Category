@@ -83,6 +83,23 @@ class Ilib_Category_Appender
      */	
 	public function add($category) 
     {
+        $result = $this->db->query(
+                "SELECT `ilib_category_append`.id FROM `ilib_category_append` " .
+                "INNER JOIN `ilib_category` ON `ilib_category`.id = `ilib_category_append`.category_id " .
+                "WHERE " .
+                "object_id = ".$this->db->quote($this->object_id, 'integer')." " .
+                "AND category_id = ".$this->db->quote($category->getId(), 'integer'). 
+                $this->extra_condition_select);
+
+        if (PEAR::isError($result)) {
+            throw new Exception("Error in query: " . $result->getUserInfo());
+            exit;
+        }
+
+        if ($result->numRows() != 0) {
+            return true;
+        }
+
         $result = $this->db->exec(
         		"INSERT INTO `ilib_category_append` " .
                 "SET " .
