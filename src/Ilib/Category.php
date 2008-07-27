@@ -210,7 +210,7 @@ class Ilib_Category
 			$this->parent_id = $row['parent_id'];
 			$this->id = $row['id'];
         } else {
-        	throw new Exception('wrong id or type');
+        	throw new Exception('wrong id or type "'.$this->id.'"');
         }
 	}
 	
