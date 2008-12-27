@@ -48,22 +48,21 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
         $category->setName('Min kategori'.$key);
         $category->setParentId(0);
         $category->save();
-        $category->load();
-        return $category;
+        return new Ilib_Category($this->db, $this->getDefaultType(), $category->getId());
     }
 
     /////////////////////////////////////////////////77
     
     function testConstruct()
     {
-        $appender = new Ilib_Category_Appender($this->db, 1);
+        $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $this->assertTrue(is_object($appender));
     }
     
     function testAdd()
     {
         
-        $appender = new Ilib_Category_Appender($this->db, 1);
+        $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $this->assertTrue($appender->add($this->createCategory()));
         
     }
@@ -71,7 +70,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
     function testDelete()
     {
         
-        $appender = new Ilib_Category_Appender($this->db, 1);
+        $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $category = $this->createCategory();
         $appender->add($category);
         $this->assertTrue($appender->delete($category));
@@ -81,7 +80,7 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
     
     function testGetCategories() {
 		
-        $appender = new Ilib_Category_Appender($this->db, 1);
+        $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $appender->add($this->createCategory(1));
         $appender->add($this->createCategory(2));
         $appender->add($this->createCategory(3));

@@ -147,7 +147,7 @@ class Ilib_Category_Appender
     public function getCategories()
     {
         $result = $this->db->query(
-                "SELECT ilib_category.* FROM ilib_category " .
+                "SELECT ilib_category.id, ilib_category.belong_to, ilib_category.belong_to_id, ilib_category.parent_id, ilib_category.name, ilib_category.identifier FROM ilib_category " .
                 "INNER JOIN ilib_category_append " .
                 "ON ilib_category_append.category_id = ilib_category.id " .
                 "WHERE ilib_category.belong_to = " . $this->getType()->getBelongTo() . " " .
