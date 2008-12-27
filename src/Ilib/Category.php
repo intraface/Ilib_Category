@@ -261,9 +261,10 @@ class Ilib_Category
     {
         $result = $this->db->query(
         		"SELECT * FROM ilib_category " .
-        		"WHERE parent_id = " . $this->id .
-                $this->extra_condition_select .
-                ";");
+        		"WHERE belong_to = " . $this->getType()->getBelongTo() . 
+                    " AND belong_to_id = " . $this->getType()->getBelongToId() .
+                    " AND parent_id = " . $this->id .
+                $this->extra_condition_select);
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
         }
@@ -284,8 +285,9 @@ class Ilib_Category
     {
         // We get all categories with one sql call then we organize the categories later.
         $result = $this->db->query( "SELECT * FROM ilib_category " .
-                "WHERE 1 = 1 " .
-                $this->extra_condition_select);
+                "WHERE belong_to = " . $this->getType()->getBelongTo() . 
+                    " AND belong_to_id = " . $this->getType()->getBelongToId() .  
+                    $this->extra_condition_select);
 
         if (PEAR::isError($result)) {
             throw new Exception("Error in query: " . $result->getUserInfo());
@@ -325,6 +327,6 @@ class Ilib_Category
     public function getAppender($object_id)
     {
         require_once 'Ilib/Category/Appender.php';
-        return new Ilib_Category_Appender($this->db, $object_id, $this->options);
+        return new Ilib_Category_Appender($this->db, $this->type, $object_id, $this->options);
     }
 }

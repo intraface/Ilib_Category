@@ -55,10 +55,11 @@ class Ilib_Category_Appender
      *
      * @return void
      */
-    public function __construct($db, $object_id, $options = array()) 
+    public function __construct($db, $type, $object_id, $options = array()) 
     {
         $this->db = $db;
         $this->object_id = intval($object_id);
+        $this->type = $type;
         
         
         if(!is_array($options)) throw new Exception('Options must be an array!');
@@ -86,9 +87,10 @@ class Ilib_Category_Appender
         $result = $this->db->query(
                 "SELECT `ilib_category_append`.id FROM `ilib_category_append` " .
                 "INNER JOIN `ilib_category` ON `ilib_category`.id = `ilib_category_append`.category_id " .
-                "WHERE " .
-                "object_id = ".$this->db->quote($this->object_id, 'integer')." " .
-                "AND category_id = ".$this->db->quote($category->getId(), 'integer'). 
+                "WHERE ilib_category.belong_to = " . $this->getType()->getBelongTo() . " " . 
+                    "AND ilib_category.belong_to_id = " . $this->getType()->getBelongToId()." ".
+                    "AND object_id = ".$this->db->quote($this->object_id, 'integer')." " .
+                    "AND category_id = ".$this->db->quote($category->getId(), 'integer'). 
                 $this->extra_condition_select);
 
         if (PEAR::isError($result)) {
@@ -148,7 +150,9 @@ class Ilib_Category_Appender
                 "SELECT ilib_category.* FROM ilib_category " .
                 "INNER JOIN ilib_category_append " .
                 "ON ilib_category_append.category_id = ilib_category.id " .
-                "WHERE ilib_category_append.object_id = " . $this->object_id . 
+                "WHERE ilib_category.belong_to = " . $this->getType()->getBelongTo() . " " .
+                    "AND ilib_category.belong_to_id = " . $this->getType()->getBelongToId()." ".
+                    "AND ilib_category_append.object_id = " . $this->object_id . 
                 $this->extra_condition_select.";");
         
         if (PEAR::isError($result)) {
@@ -161,6 +165,16 @@ class Ilib_Category_Appender
             
         }
         return $sub;
+    }
+    
+    /**
+     * get category type
+     *
+     * @return Category_Type
+     */
+    public function getType()
+    {
+        return $this->type;
     }
     
 	
