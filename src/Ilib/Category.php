@@ -251,6 +251,23 @@ class Ilib_Category
 		}
         return true;
 	}
+	
+	/**
+	 * Delete a loaded category
+	 * @return void
+	 */
+	public function delete()
+	{
+	    if($this->id == 0) {
+	        throw new Exception('You cannot delete if no id is set');
+	    }
+	    
+	    $result = $this->db->exec("UPDATE ilib_category SET active = 0 WHERE id = ".$this->id.$this->extra_condition_select);
+        if (PEAR::isError($result)) {
+            throw new Exception("Error in delete: " . $result->getUserInfo());
+        }
+	    
+	}
 
 	/**
      * get sub categories
@@ -264,6 +281,7 @@ class Ilib_Category
         		"WHERE belong_to = " . $this->getType()->getBelongTo() . 
                     " AND belong_to_id = " . $this->getType()->getBelongToId() .
                     " AND parent_id = " . $this->id .
+                    " AND active = 1" .
                 $this->extra_condition_select);
         if (PEAR::isError($result)) {
         	throw new Exception("Error in query: " . $result->getUserInfo());
@@ -286,7 +304,8 @@ class Ilib_Category
         // We get all categories with one sql call then we organize the categories later.
         $result = $this->db->query( "SELECT * FROM ilib_category " .
                 "WHERE belong_to = " . $this->getType()->getBelongTo() . 
-                    " AND belong_to_id = " . $this->getType()->getBelongToId() .  
+                    " AND belong_to_id = " . $this->getType()->getBelongToId() .
+                    " AND active = 1 " .  
                     $this->extra_condition_select);
 
         if (PEAR::isError($result)) {

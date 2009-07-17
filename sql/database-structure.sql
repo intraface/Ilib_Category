@@ -16,3 +16,4 @@ PRIMARY KEY  (`id`));
 ALTER TABLE `ilib_category` ADD INDEX ( `intranet_id` , `belong_to` , `belong_to_id` )  ;
 ALTER TABLE `ilib_category` ADD INDEX ( `parent_id` )  ;
 ALTER TABLE `ilib_category_append` ADD INDEX ( `intranet_id` , `object_id` , `category_id` )  ;
+ALTER TABLE `ilib_category` ADD `active` INT( 1 ) NOT NULL DEFAULT '1' ;

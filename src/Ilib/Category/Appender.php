@@ -151,6 +151,7 @@ class Ilib_Category_Appender
                 "INNER JOIN ilib_category_append " .
                 "ON ilib_category_append.category_id = ilib_category.id " .
                 "WHERE ilib_category.belong_to = " . $this->getType()->getBelongTo() . " " .
+                    "AND ilib_category.active = 1 " .
                     "AND ilib_category.belong_to_id = " . $this->getType()->getBelongToId()." ".
                     "AND ilib_category_append.object_id = " . $this->object_id . 
                 $this->extra_condition_select.";");
