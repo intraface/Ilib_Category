@@ -61,11 +61,13 @@ class Ilib_Category_Appender
         $this->type = $type;
 
 
-        if(!is_array($options)) throw new Exception('Options must be an array!');
+        if (!is_array($options)) {
+            throw new Exception('Options must be an array!');
+        }
         $this->extra_condition_delete = '';
         $this->extra_condition_select = '';
         $this->extra_condition_update = '';
-        if(isset($options['extra_condition']) && is_array($options['extra_condition'])) {
+        if (isset($options['extra_condition']) && is_array($options['extra_condition'])) {
             foreach($options['extra_condition'] AS $condition) {
                 $this->extra_condition_delete .= ' AND '.$condition;
                 $this->extra_condition_select .= ' AND ilib_category.'.$condition.' AND ilib_category_append.'.$condition;

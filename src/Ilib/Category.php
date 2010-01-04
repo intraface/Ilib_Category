@@ -258,7 +258,7 @@ class Ilib_Category
      */
     public function delete()
     {
-        if($this->id == 0) {
+        if ($this->id == 0) {
             throw new Exception('You cannot delete if no id is set');
         }
 
@@ -287,7 +287,7 @@ class Ilib_Category
             throw new Exception("Error in query: " . $result->getUserInfo());
         }
         $sub = array();
-        while($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+        while ($row = $result->fetchRow(MDB2_FETCHMODE_ASSOC)) {
             $sub[$row['id']] = $row['identifier'];
         }
         return $sub;
@@ -340,6 +340,8 @@ class Ilib_Category
 
     /**
      * Returns appender object
+     *
+     * @param integer $object_id
      *
      * @return object Ilib_Category_Appender instance
      */
