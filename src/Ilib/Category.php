@@ -329,8 +329,8 @@ class Ilib_Category
         foreach ($categories AS $category) {
             if ($category['parent_id'] == $parent_id) {
                 $return[$category['id']] = array_merge(
-                $category,
-                array('categories' => $this->getCategoriesByParentId($category['id'], $categories))
+                    $category,
+                    array('categories' => $this->getCategoriesByParentId($category['id'], $categories))
                 );
 
             }
