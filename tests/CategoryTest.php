@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__) . '/config.test.php';
-require_once 'PHPUnit/Framework.php';
 
 require_once '../src/Ilib/Category.php';
 require_once '../src/Ilib/Category/Appender.php';
@@ -16,37 +15,34 @@ class CategoryTest extends PHPUnit_Framework_TestCase
     {
         $this->db = MDB2::factory(DB_DSN);
         if (PEAR::isError($this->db)) {
-            die($this->db->getUserInfo());
+            throw new Exception($this->db->getUserInfo());
         }
-        
-        $result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-        $result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-        
-        
 	}
     
     function tearDown()
     {
-		
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
+        if (PEAR::isError($result)) {
+            throw new Exception($result->getUserInfo());
+        }
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
+        if (PEAR::isError($result)) {
+            throw new Exception($result->getUserInfo());
+        }		
     }
 
-    function getDefaultType() {
+    function getDefaultType() 
+    {
     	return new Ilib_Category_Type('default', 4);
     }
     
     //////////////////////////////////////////////
     
     
-    function testCreateType() {
+    function testCreateType() 
+    {
 		$type = $this->getDefaultType();
-		$this->assertEquals(1, $type->getBelongTo());
-    	
+		$this->assertEquals(1, $type->getBelongTo());	
     }
     
     function testCreateCategory()
@@ -58,11 +54,10 @@ class CategoryTest extends PHPUnit_Framework_TestCase
 		
 		$this->assertTrue($category_hest->save());	// test INSERT query
         $this->assertTrue($category_hest->save());	// test UPDATE query
-		
     }
     
-    function testLoadCategory() {
-    	
+    function testLoadCategory() 
+    {	
 		$category = new Ilib_Category($this->db, $this->getDefaultType());
         $category->setIdentifier('min-kategori');
         $category->setName('Min kategori');
@@ -77,8 +72,8 @@ class CategoryTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(0, $category->getParentId());
     }
     
-    function testLoadSubCategory() {
-		
+    function testLoadSubCategory() 
+    {	
 		$category = new Ilib_Category($this->db, $this->getDefaultType());
         $category->setIdentifier('min-kategori');
         $category->setName('Min kategori');

@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__) . '/config.test.php';
-require_once 'PHPUnit/Framework.php';
 
 require_once '../src/Ilib/Category.php';
 require_once '../src/Ilib/Category/Appender.php';
@@ -16,28 +15,24 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
     {
         $this->db = MDB2::factory(DB_DSN);
         if (PEAR::isError($this->db)) {
-            die($this->db->getUserInfo());
+            throw new Exception($this->db->getUserInfo());
         }
-        
-        $result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-        $result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
-        if (PEAR::isError($result)) {
-            die($result->getUserInfo());
-        }
-        
-        
     }
     
     function tearDown()
     {
-		
-        
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category`');
+        if (PEAR::isError($result)) {
+            throw new Exception($result->getUserInfo());
+        }
+        $result = $this->db->exec('TRUNCATE TABLE `ilib_category_append`');
+        if (PEAR::isError($result)) {
+            throw new Exception($result->getUserInfo());
+        }            
     }
     
-    function getDefaultType() {
+    function getDefaultType() 
+    {
         return new Ilib_Category_Type('default', 4);
     }
     
@@ -61,25 +56,20 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
     
     function testAdd()
     {
-        
         $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
-        $this->assertTrue($appender->add($this->createCategory()));
-        
+        $this->assertTrue($appender->add($this->createCategory()));   
     }
     
     function testDelete()
     {
-        
         $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $category = $this->createCategory();
         $appender->add($category);
-        $this->assertTrue($appender->delete($category));
-        
+        $this->assertTrue($appender->delete($category));   
     }
     
-    
-    function testGetCategories() {
-		
+    function testGetCategories() 
+    {	
         $appender = new Ilib_Category_Appender($this->db, $this->getDefaultType(), 1);
         $appender->add($this->createCategory(1));
         $appender->add($this->createCategory(2));
@@ -114,6 +104,4 @@ class CategoryAppendTest extends PHPUnit_Framework_TestCase
         
         $this->assertEquals($expected, $appender->getCategories());
     }
-
-
 }
